@@ -1,0 +1,80 @@
+<?php
+session_start();
+
+include 'includes/dbconn.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['username'])) {
+    $username = $_SESSION['username']; // USE USERNAME
+    $review_text = $_POST['review_text'];
+    $rating = (int)$_POST['rating'];
+
+
+    $stmt = $pdo->prepare("INSERT INTO reviews (username, review_text, rating) VALUES (:username, :review_text, :rating)");
+    $stmt->execute([
+        ':username' => $username,
+        ':review_text' => $review_text,
+        ':rating' => $rating
+    ]);
+}
+
+include_once 'includes/header.php';
+?>
+
+<div class="sub-header-container">
+    <div class="sub-header">
+        <p>Reviews</p>
+    </div>
+</div>  
+
+<!-- ONLY ACCESSIBLE IF THE USER IS SIGNED IN -->
+<?php if (isset($_SESSION['username'])): ?>
+
+    <div class="review-form-container">
+        <div class="review-form">
+            <h2>Leave a Review</h2>
+            <form method="POST" action="reviews.php">
+
+                <textarea name="review_text" class="review-text" placeholder="Write your review..." required></textarea>
+                <select name="rating" required>
+                    <option value="5">★★★★★</option>
+                    <option value="4">★★★★</option>
+                    <option value="3">★★★</option>
+                    <option value="2">★★</option>
+                    <option value="1">★</option>
+                </select>
+                <button type="submit">Submit Review</button>
+            </form>
+        </div>
+    </div>
+<?php endif; ?>
+
+<div class="review-container-container">
+
+<!-- REVIEW AREA -->
+<?php
+$sql = "SELECT * FROM reviews ORDER BY created_at DESC";
+$stmt = $pdo->query($sql);
+$reviews = $stmt->fetchAll();
+
+if ($reviews) {
+    foreach ($reviews as $row) {
+        echo "<div class= 'review-container'>";
+        echo "<div class='review'>";
+        echo "<h4>" . htmlspecialchars($row['username']) . "</h4>";
+        echo "<p>" . htmlspecialchars($row['review_text']) . "</p>";
+        echo "<p>Rating: " . str_repeat("★", $row['rating']) . "</p>";
+        echo "<small>Posted on " . $row['created_at'] . "</small>";
+        echo "</div>";
+        echo "</div>";
+    }
+} else {
+    echo "No reviews yet. Be the first!";
+}
+
+?>
+
+</div>
+
+<?php
+include_once 'includes/footer.php';
+?>
