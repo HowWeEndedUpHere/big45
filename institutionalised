@@ -1,0 +1,32 @@
+.hero {
+    width: 100%;
+    height: 450px;
+    background-image: url(../img/hero.png);
+    background-size: cover;
+    background-position: center;
+    padding-top: 30px;
+    margin-bottom: 40px;
+}
+
+
+<div class="second-home-img">
+
+</div>
+
+<div class="home-content">
+    <img src="../Day_1/assets/img/award.png" alt="Award">
+    <div class="open-times">
+        <h1>Open Times (Day Visit):</h1>
+        <br>
+        <hr>
+        <br>
+        <p>Monday: 1-12</p>
+        <p>Tuesday: 1-12</p>
+        <p>Wednesday: 1-12</p>
+        <p>Thursday: 1-12</p>
+        <p>Friday: 1-12</p>
+        <p>Saturday: 1-12</p>
+        <p>Sunday: 1-12</p>
+    </div>
+    <img src="../Day_1/assets/img/award.png" alt="Award">
+</div>
