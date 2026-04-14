@@ -1,0 +1,70 @@
+<?php
+include 'db.php';
+
+$sql = "SELECT product, stock, price, recalled FROM inventory";
+$result = $conn->query($sql);
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 70%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .recalled {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="text-align:center;">Inventory List</h2>
+
+<table>
+    <tr>
+        <th>Product</th>
+        <th>Stock</th>
+        <th>Price (£)</th>
+        <th>Status</th>
+    </tr>
+
+    <?php
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+
+            // Check recall status (assuming 1 = recalled, 0 = safe)
+            $status = $row['recalled'] ? 
+                "<span class='recalled'>Recalled</span>" : 
+                "Available";
+
+            echo "<tr>
+                    <td>{$row['product']}</td>
+                    <td>{$row['stock']}</td>
+                    <td>{$row['price']}</td>
+                    <td>$status</td>
+                  </tr>";
+        }
+    } else {
+        echo "<tr><td colspan='4'>No products found</td></tr>";
+    }
+
+    $conn->close();
+    ?>
+
+</table>
+
+</body>
+</html>
