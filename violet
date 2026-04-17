@@ -1,0 +1,39 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "your_database");
+$customer_id = 1;
+
+$sql = "SELECT c.product_id, c.quantity, i.price 
+        FROM cart c
+        JOIN inventory i ON c.product_id = i.product_id
+        WHERE c.customer_id = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $customer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$total = 0;
+?>
+
+<h2>Your Cart</h2>
+
+<?php
+while ($row = $result->fetch_assoc()) {
+    $subtotal = $row['price'] * $row['quantity'];
+    $total += $subtotal;
+
+    echo "Product: {$row['product_id']} | Qty: {$row['quantity']} | Subtotal: £{$subtotal}<br>";
+}
+?>
+
+<h3>Total: £<?php echo $total; ?></h3>
+
+<form action="place_order.php" method="post">
+    <label>
+        <input type="checkbox" name="delivery" value="1">
+        Request Delivery
+    </label>
+
+    <br><br>
+    <button type="submit">Place Order</button>
+</form>
