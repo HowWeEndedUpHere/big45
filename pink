@@ -1,0 +1,42 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "your_database");
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    $order_id = $_POST['order_id'];
+    $date = $_POST['delivery_date'];
+    $time = $_POST['delivery_time'];
+
+    $sql = "INSERT INTO delivery (order_id, delivery_date, delivery_time)
+            VALUES (?, ?, ?)";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iss", $order_id, $date, $time);
+    $stmt->execute();
+
+    echo "<h3>Delivery scheduled successfully!</h3>";
+    exit();
+}
+
+// If not submitted, show form
+$order_id = $_GET['order_id'];
+?>
+
+<h2>Schedule Delivery</h2>
+
+<form method="post">
+    <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
+
+    <label>Delivery Date:</label>
+    <input type="date" name="delivery_date" required>
+
+    <br><br>
+
+    <label>Delivery Time:</label>
+    <input type="time" name="delivery_time" required>
+
+    <br><br>
+
+    <button type="submit">Confirm Delivery</button>
+</form>
