@@ -1,0 +1,67 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "your_database");
+$customer_id = 1;
+
+$delivery_requested = isset($_POST['delivery']);
+
+$conn->begin_transaction();
+
+try {
+    $sql = "SELECT c.product_id, c.quantity, i.price 
+            FROM cart c
+            JOIN inventory i ON c.product_id = i.product_id
+            WHERE c.customer_id = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $customer_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $insert = $conn->prepare(
+        "INSERT INTO orders (product_id, customer_id, quantity, cost, completed) 
+         VALUES (?, ?, ?, ?, 0)"
+    );
+
+    $first = true;
+    $order_id = null;
+
+    while ($row = $result->fetch_assoc()) {
+        $cost = $row['price'] * $row['quantity'];
+
+        $insert->bind_param(
+            "iiid",
+            $row['product_id'],
+            $customer_id,
+            $row['quantity'],
+            $cost
+        );
+        $insert->execute();
+
+        if ($first) {
+            $order_id = $conn->insert_id;
+            $first = false;
+        }
+    }
+
+    if ($order_id === null) {
+        throw new Exception("Cart is empty");
+    }
+
+    $clear = $conn->prepare("DELETE FROM cart WHERE customer_id = ?");
+    $clear->bind_param("i", $customer_id);
+    $clear->execute();
+
+    $conn->commit();
+
+    if ($delivery_requested) {
+        header("Location: delivery_form.php?order_id=" . $order_id);
+        exit();
+    } else {
+        echo "Order placed successfully!";
+    }
+
+} catch (Exception $e) {
+    $conn->rollback();
+    echo "Error: " . $e->getMessage();
+}
+?>
